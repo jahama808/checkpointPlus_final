@@ -1,58 +1,124 @@
-# checkpointPlus Final
-This version uses speedtest-cli to run the tests instead of iPerf.
+# Checkpoint Production Load
 
-The program takes a list of ookla servers (using their id numbers) and then cycles thru them running both a multi-threaded test and a single threaded test.
+This code runs 2 types of tests against 1 or more ookla servers (defined in the settings.py file).  
 
-It then selects the highest value from the Download results and presents that to the user.
+The first test is a multi-threaded test and then a single-threaded test.
 
-# Result retention
+The results are stored for each server for each type fo test, and then the highest speed is selected and displayed to the user on the Nextion 3.2" display.
 
-Once completed, all results are sent to checkpointdb_version4 database.
+The full results are written to a mysql database on a remote server, which also has a GUI for viewing the results.  The database server and front end are defined in the XXXXXX repo.
 
-The database should reside in a docker for isolation and rapid restoration in the event of a failure.  However, the code does allow for a failure to occur on the upload of the results.  In the event of such a failure, the results are lost (as they are not retained locally).
+The final version of this device is based on the Raspberry Pi 4 (1GB) with a 32 GB SD card and the Nextion enhanced 3.2" display.
 
-# Creating database
+# Prepping the microSD card
 
-Use the following commands to create the docker container:
+Download raspbian "Buster" and load it on the microSD card.
+
+Perform an update and upgrade:
+```
+sudo apt-get update
+sudo apt-get install upgrade
+sudo apt-get update
+```
+Once Buster is loaded, add the following:
+
+Speedtest-cli
 
 ```
-docker container run --name checkpointdb_version4 -d -e MYSQL_ROOT_PASSWORD=titpfcheckpoint! -p 3310:3306 -v $(pwd)/ -d mariadb
-```
-
-access the container:
-```
-docker exec -it checkpointdb_version4 bash
-```
-
-then create the database:
-```
-mysql -u root -p
-create database checkpointdb_version4
-```
-
-then the tables:
-```
-use checkpointdb_version4
-
-
-
-create table results (testID INT,identity varchar(20), wanip varchar(16), lanip varchar(16), multithread_down int(16), multithread_up float(16), multithread_target int(11),multithread_latency float, multithread_sponsor varchar(100), multithread_share varchar(200), singlethread_down float(16),singlethread_up float(16), singlethread_target int(11), singelthread_latency float, singlethread_sponsor varchar(100), singlethread_share varchar(200),timeCreate timestamp); 
-```
-
-# REQUIREMENTS
-
-This code uses the speedtest-cli script written by sivel.  Install this on the Pi:
-
-```
-mkdir speedtest-cli
-cd speedtest-cli
 curl -Lo speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
 chmod +x speedtest-cli
 speedtest-cli
 ```
 
-add the directory to your PATH. On the dietpi:
 
+mysqldb
 ```
-PATH=$PATH:/root/speedtest-cli-code/
+apt-get install python-mysqldb -y
 ```
+pip (or pip3)
+```
+sudo apt-get install python-pip -y
+or
+sudo apt-get install python3-pip -y
+```
+
+pyserial
+```
+sudo pip install pyserial
+```
+
+git
+```
+sudo apt-get install git -y
+```
+
+pandas
+```
+sudo apt-get install python-pandas -y
+```
+Once these modules are loaded, git clone this repo into the /home/pi directory.
+
+Don't forget to add it into /etc/rc.local
+
+# Wiring the Nextion 3.2 " display to the RPi 4
+
+There are four leads from the Nextion display:
+Power (Red)
+Ground (Black)
+Tx (Blue?)
+Rx (Yellow?)
+
+They map to the RPi 4 board as follows:
+
+
+
+RPi 4 to Nextion HMI pinout
+
+| RPi4       | Nextion     |
+| ------------- |:-------------:|
+| 5V            |VCC            |
+| 15            | TX            | 
+| 14             | RX            |   
+| GND           | GND           |  
+
+
+The GPIO pinout is basically the same as the one used on the Odroid-C2, so we can just follow that.
+
+![RPi4 GPIO Pinout](https://pinout.xyz/resources/raspberry-pi-pinout.png)
+
+
+The serial on GPIO 14 & 15 is disabled because it is used by the bluetooth. To enable the serial interface, you must add the lines below to /boot/config.txt you must do this thru the terminal using sudo nano /boot/config.txt
+
+click the terminal icon (black screen icon) on the top of the screen
+type sudo nano /boot/config.txt
+using you arrows, scroll to the bottom of the screen and add the lines below to the bottom of the files
+```
+#disable bluetooth so nextion can work on serial 0
+
+dtoverlay=pi3-disable-bt
+
+enable_uart=1
+```
+*Note: I used "pi3" and it worked.  I don't think using "pi4" works.
+
+Once these lines are added, next we save and exit
+press control x to exit
+press Y to save
+press [enter] to save file
+shutdown & remove pwr from the pi
+
+restart.
+
+### Enabling the serial port and disabling serial port login
+
+We'll do this part via raspi-config:
+
+
+5. Open the terminal and type sudo raspi-config
+
+6. go to Interfacing options, then serial and enable the serial port and disable the shell
+
+7. Tab to finish
+
+8. Reboot one more time
+
