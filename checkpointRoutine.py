@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# Code Version #
+software = "v191014"
 
 import pandas as pd
 import os,subprocess
@@ -29,7 +31,7 @@ def main():
 	#create unitID from mac address
 
 	direct_output = subprocess.check_output('ifconfig eth0 | grep ether', shell=True)
-	unitID = "2019-{}".format(direct_output[direct_output.find('ether',0)+15:direct_output.find('  txqueuelen')])
+	unitID = "HT:{}".format(direct_output[direct_output.find('ether',0)+15:direct_output.find('  txqueuelen')])
 	print("unit ID: {}".format(unitID))
 
 	while True:
@@ -41,14 +43,15 @@ def main():
 		Page = 0 #page0 is the norm and page 1 is all black with large #'s for easy reading in the AM
 
 		#show the intro screen
-		port.write("page 0" + eof)
-		time.sleep(3)
+		port.write("page 5" + eof)
+
 
 
 		#switch to page 4 - show unitID
 		port.write("page 4"+eof)
 		port.write('page4.deviceID.txt="'+str(unitID)+'"'+eof)
-		time.sleep(10)
+		port.write('page4.softwareID.txt="'+software+'"'+eof)
+		time.sleep(5)
 
 
 		#create the results dataframe
