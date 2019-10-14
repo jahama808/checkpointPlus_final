@@ -33,7 +33,7 @@ speedtest-cli
 
 mysqldb
 ```
-apt-get install python-mysqldb -y
+sudo apt-get install python-mysqldb -y
 ```
 pip (or pip3)
 ```
