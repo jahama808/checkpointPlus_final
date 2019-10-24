@@ -10,6 +10,12 @@ The full results are written to a mysql database on a remote server, which also 
 
 The final version of this device is based on the Raspberry Pi 4 (1GB) with a 32 GB SD card and the Nextion enhanced 3.2" display.
 
+The Raspberry Pi 4 has the following specs:
+
+|CPU|RAM|ETH|CHARGING PORT|
+|----|----|----|----|
+|1.5-GHz, Quad-Core Broadcom BCM2711B0 (Cortex A-72)|1GB|1Gbps|USB-C|
+
 # Prepping the microSD card
 
 Download raspbian "Buster" and load it on the microSD card.
