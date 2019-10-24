@@ -60,13 +60,16 @@ Once these modules are loaded, git clone this repo into the /home/pi directory.
 
 Don't forget to add it into /etc/rc.local
 
-#Changes to /etc/rc.local
+# Changes to /etc/rc.local
 
 add "startme.sh" to the file
 
+```
 /root/checkpointv2_production/startme.sh 
+```
 
-How it works:
+## How it works:
+
 git fetch downloads the latest from remote without trying to merge or rebase anything.
 
 Then the git reset resets the master branch to what you just fetched. The --hard option changes all the files in your working tree to match the files in origin/master.
