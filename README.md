@@ -6,7 +6,7 @@ The first test is a multi-threaded test and then a single-threaded test.
 
 The results are stored for each server for each type fo test, and then the highest speed is selected and displayed to the user on the Nextion 3.2" display.
 
-The full results are written to a mysql database on a remote server, which also has a GUI for viewing the results.  The database server and front end are defined in the XXXXXX repo.
+The full results are written to a mysql database on a remote server, which also has a GUI for viewing the results.  The database server and front end are defined in the ChecpointControlCenter repo.
 
 The final version of this device is based on the Raspberry Pi 4 (1GB) with a 32 GB SD card and the Nextion enhanced 3.2" display.
 
