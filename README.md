@@ -6,9 +6,15 @@ The first test is a multi-threaded test and then a single-threaded test.
 
 The results are stored for each server for each type fo test, and then the highest speed is selected and displayed to the user on the Nextion 3.2" display.
 
-The full results are written to a mysql database on a remote server, which also has a GUI for viewing the results.  The database server and front end are defined in the XXXXXX repo.
+The full results are written to a mysql database on a remote server, which also has a GUI for viewing the results.  The database server and front end are defined in the ChecpointControlCenter repo.
 
 The final version of this device is based on the Raspberry Pi 4 (1GB) with a 32 GB SD card and the Nextion enhanced 3.2" display.
+
+The Raspberry Pi 4 has the following specs:
+
+|CPU|RAM|ETH|CHARGING PORT|
+|----|----|----|----|
+|1.5-GHz, Quad-Core Broadcom BCM2711B0 (Cortex A-72)|1GB|1Gbps|USB-C|
 
 # Prepping the microSD card
 
@@ -60,13 +66,16 @@ Once these modules are loaded, git clone this repo into the /home/pi directory.
 
 Don't forget to add it into /etc/rc.local
 
-#Changes to /etc/rc.local
+# Changes to /etc/rc.local
 
 add "startme.sh" to the file
 
+```
 /root/checkpointv2_production/startme.sh 
+```
 
-How it works:
+## How it works:
+
 git fetch downloads the latest from remote without trying to merge or rebase anything.
 
 Then the git reset resets the master branch to what you just fetched. The --hard option changes all the files in your working tree to match the files in origin/master.
