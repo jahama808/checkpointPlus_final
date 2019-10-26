@@ -152,6 +152,10 @@ def main():
 
 		# Wait before 
 		time.sleep(3600)
+
+		#dim the screen
+		port.write("dim=25" + eof)
+
 		print("DEBUG: Starting Loop at {}".format(datetime.datetime.now()))
 
 if __name__ == "__main__":
