@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Code Version #
-software = "v191014"
+software = "v200619"
 
 import pandas as pd
 import os,subprocess
@@ -114,23 +114,33 @@ def main():
 
 		# create new dataframes for the multithreaded results and single threaded results
 
-		st_df = results_df[results_df['test_type']=='single-thread']
-		mt_df = results_df[results_df['test_type']=='multi-thread']
+		try:
+			st_df = results_df[results_df['test_type']=='single-thread']
+			singlethread = SpeedTest(st_df)
+		except:
+			print("DEBUG: Failed to extract single threaded results <----------------------")
 
-		singlethread = SpeedTest(st_df)
-		multithread = SpeedTest(mt_df)
+		try:
+			mt_df = results_df[results_df['test_type']=='multi-thread']
+			multithread = SpeedTest(mt_df)
+		except:
+			print("DEBUG: Failed to extract multi threaded results <---------------------")
 
+		
 		# Open up the database  connection
 		conn = MySQLdb.connect(host=host,port=dbport,user=dbUser,passwd=dbPass,db=database)
 		c = conn.cursor()
-
-		result = "insert into panda_results (identity,wanip,lanip,multithread_down,multithread_up,multithread_target,multithread_latency,multithread_sponsor,multithread_share,\
+		
+		try:
+			result = "insert into panda_results (identity,wanip,lanip,multithread_down,multithread_up,multithread_target,multithread_latency,multithread_sponsor,multithread_share,\
 		singlethread_down,singlethread_up,singlethread_target,singlethread_latency,singlethread_sponsor,singlethread_share,timeCreated)\
 		values (\"{}\",\"{}\",\"{}\",{},{},{},{},\"{}\",\"{}\",{},{},{},{},\"{}\",\"{}\",\"{}\");".\
 		format(unitID,wanIP,lanIP,multithread.down,multithread.up,multithread.target,multithread.latency,multithread.sponsor,multithread.share,\
 		singlethread.down,singlethread.up,singlethread.target,singlethread.latency,singlethread.sponsor,singlethread.share,datetime.datetime.now())
-
+		except:
+			print("DEBUG: No data written to database")
 		c.execute(result)
+		
 		conn.commit()
 		conn.close()
 
