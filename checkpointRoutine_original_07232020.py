@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # Code Version #
-software = "7/22/2020"
+software = "v200619"
 
 import pandas as pd
 import os,subprocess
@@ -33,8 +33,6 @@ def main():
 	direct_output = subprocess.check_output('ifconfig eth0 | grep ether', shell=True)
 	unitID = "HT:{}".format(direct_output[direct_output.find('ether',0)+15:direct_output.find('  txqueuelen')])
 	print("unit ID: {}".format(unitID))
-
-	print("DEBUG:Execution begin at ",datetime.datetime.now())
 
 	while True:
 		#use this for Raspberry Pi's
@@ -78,15 +76,14 @@ def main():
 		print("DEBUG: Starting Multi-thread Ookla tests")
 
 		port.write("page 1"+eof)
-		showserver="HT"
 
 		for target in ooklaTargets:
 
 			port.write("page 1"+eof)
-			port.write('page1.target.txt="'+str(showserver)+'"'+eof)
+			port.write('page1.target.txt="'+str(target)+'"'+eof)
 			print("DEBUG: 	Target server {} starting".format(target))
 			try:
-				result = subprocess.check_output("/home/pi/speedtest-cli --json  --mini http://{}".format(target), shell=True)
+				result = subprocess.check_output("/home/pi/speedtest-cli --json  --share --server {}".format(target), shell=True)
 			
 				df = pd.read_json(result)
 				results_df = results_df.append({'server':target,'test_type':'multi-thread','download':df['download'].iloc[0],'upload':df['upload'].iloc[0],'latency':df['ping'].iloc[0],'sponsor':df['server'].iloc[df.index.get_loc('sponsor')],'share':df['share'].iloc[0]},ignore_index=True)
@@ -101,11 +98,11 @@ def main():
 		for target in ooklaTargets:
 
 				port.write("page 2"+eof)
-				port.write('page2.target.txt="'+str(showserver)+'"'+eof)
+				port.write('page2.target.txt="'+str(target)+'"'+eof)
 
 				print("DEBUG: 	Target server {} starting".format(target))
 				try:
-					result = subprocess.check_output("/home/pi/speedtest-cli --json  --single --mini http://{}".format(target), shell=True)
+					result = subprocess.check_output("/home/pi/speedtest-cli --json  --share --single --server {}".format(target), shell=True)
 					df = pd.read_json(result)
 					results_df = results_df.append({'server':target,'test_type':'single-thread','download':df['download'].iloc[0],'upload':df['upload'].iloc[0],'latency':df['ping'].iloc[0],'sponsor':df['server'].iloc[df.index.get_loc('sponsor')],'share':df['share'].iloc[0]},ignore_index=True)
 					print("DEBUG: 	Target server {} completed".format(target))	
@@ -138,15 +135,13 @@ def main():
 			result = "insert into panda_results (identity,wanip,lanip,multithread_down,multithread_up,multithread_target,multithread_latency,multithread_sponsor,multithread_share,\
 		singlethread_down,singlethread_up,singlethread_target,singlethread_latency,singlethread_sponsor,singlethread_share,timeCreated)\
 		values (\"{}\",\"{}\",\"{}\",{},{},{},{},\"{}\",\"{}\",{},{},{},{},\"{}\",\"{}\",\"{}\");".\
-		format(unitID,wanIP,lanIP,multithread.down,multithread.up,34623,multithread.latency,"Hawaiian Telcom",multithread.share,\
-		singlethread.down,singlethread.up,34623,singlethread.latency,"Hawaiian Telcom",singlethread.share,datetime.datetime.now())
-			print("DEBUG: Pushed to database at ",datetime.datetime.now())
-			conn.commit()
+		format(unitID,wanIP,lanIP,multithread.down,multithread.up,multithread.target,multithread.latency,multithread.sponsor,multithread.share,\
+		singlethread.down,singlethread.up,singlethread.target,singlethread.latency,singlethread.sponsor,singlethread.share,datetime.datetime.now())
 		except:
 			print("DEBUG: No data written to database")
 		c.execute(result)
 		
-		
+		conn.commit()
 		conn.close()
 
 		# print to Nextion Display
@@ -165,9 +160,7 @@ def main():
 		port.write('page3.stlatency.txt="'+str(singlethread.latency)+'"'+eof)
 		port.write('page3.lanip.txt="'+lanIP+'"'+eof)
 
-		print("DEBUG:Execution completed at ",datetime.datetime.now()) 
-		# Wait before
-		print("DEBUG:Entering wait loop at ",datetime.datetime.now()) 
+		# Wait before 
 		time.sleep(3600)
 
 		#dim the screen
