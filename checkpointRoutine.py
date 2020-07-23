@@ -141,10 +141,12 @@ def main():
 		format(unitID,wanIP,lanIP,multithread.down,multithread.up,34623,multithread.latency,"Hawaiian Telcom",multithread.share,\
 		singlethread.down,singlethread.up,34623,singlethread.latency,"Hawaiian Telcom",singlethread.share,datetime.datetime.now())
 			print("DEBUG: Pushed to database at ",datetime.datetime.now())
+			print("DEBUG: ",result)
+			c.execute(result)
 			conn.commit()
 		except:
 			print("DEBUG: No data written to database")
-		c.execute(result)
+		
 		
 		
 		conn.close()
